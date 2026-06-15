@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оплата не прошла - ShinyRoses</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #d4af37;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --error: #ff4444;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 60px 40px;
+        }
+
+        .emoji {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 40px rgba(255, 68, 68, 0.6);
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 40px rgba(255, 68, 68, 0.6);
+            }
+            to {
+                text-shadow: 0 0 60px rgba(255, 68, 68, 1), 0 0 80px rgba(255, 68, 68, 0.8);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--error);
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        .message {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--gold);
+            color: var(--bg-primary);
+            text-decoration: none;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            background: #e6c247;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .payment-container {
+                padding: 40px 20px;
+            }
+
+            .emoji {
+                font-size: 6rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="emoji">🥀</div>
+        <h1>К сожалению, оплата не прошла</h1>
+        <p class="message">
+            Попробуйте другой способ оплаты
+        </p>
+        <button class="btn" onclick="goBack()">Вернуться к оформлению</button>
+    </div>
+
+    <script>
+        function goBack() {
+            // Возвращаемся на главную страницу и открываем модальное окно с сохраненными данными
+            window.location.href = 'index.html?restoreOrder=true';
+        }
+    </script>
+</body>
+</html>
