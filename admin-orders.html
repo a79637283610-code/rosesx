@@ -298,6 +298,7 @@
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
             const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
             lastOrderCount = paidOrders.length;
+            console.log('Auto-refresh started, initial order count:', lastOrderCount);
             
             autoRefreshInterval = setInterval(() => {
                 checkForNewOrders();
@@ -307,6 +308,7 @@
         function stopAutoRefresh() {
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
+                console.log('Auto-refresh stopped');
             }
         }
 
@@ -314,7 +316,10 @@
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
             const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
             
+            console.log('Checking for new orders, current count:', paidOrders.length, 'last count:', lastOrderCount);
+            
             if (paidOrders.length > lastOrderCount) {
+                console.log('New order detected!');
                 playNotificationSound();
                 loadOrders();
                 lastOrderCount = paidOrders.length;
@@ -322,11 +327,8 @@
         }
 
         function playNotificationSound() {
-        function playNotificationSound() {
             const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ');
             audio.play().catch(e => console.log('Audio play failed:', e));
-        }
-            audio.play();
         }
 
         function loadOrders() {
