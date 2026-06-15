@@ -312,17 +312,31 @@
             }
         }
 
-        function checkForNewOrders() {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
-            
-            console.log('Checking for new orders, current count:', paidOrders.length, 'last count:', lastOrderCount);
-            
-            if (paidOrders.length > lastOrderCount) {
-                console.log('New order detected!');
-                playNotificationSound();
-                loadOrders();
-                lastOrderCount = paidOrders.length;
+        async function checkForNewOrders() {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyOpKMuDCez7meTTtp1pqGi1DbfVghLH-6kF8iznj1GIvocBxbGvefSqgZvMVwQdIvU/exec?action=getOrders');
+                const orders = await response.json();
+                const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
+                
+                console.log('Checking for new orders, current count:', paidOrders.length, 'last count:', lastOrderCount);
+                
+                if (paidOrders.length > lastOrderCount) {
+                    console.log('New order detected!');
+                    playNotificationSound();
+                    loadOrders();
+                    lastOrderCount = paidOrders.length;
+                }
+            } catch (error) {
+                console.error('Ошибка при проверке новых заказов:', error);
+                // Fallback to localStorage
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
+                
+                if (paidOrders.length > lastOrderCount) {
+                    playNotificationSound();
+                    loadOrders();
+                    lastOrderCount = paidOrders.length;
+                }
             }
         }
 
@@ -331,54 +345,56 @@
             audio.play().catch(e => console.log('Audio play failed:', e));
         }
 
-        function loadOrders() {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const ordersList = document.getElementById('ordersList');
-            
-            // Фильтруем только оплаченные заказы
-            const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
-            
-            if (paidOrders.length === 0) {
-                ordersList.innerHTML = `
-                    <div class="no-orders">
-                        <i class="fas fa-box-open"></i>
-                        <p>Оплаченных заказов пока нет</p>
-                    </div>
-                `;
-                return;
-            }
+        async function loadOrders() {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyOpKMuDCez7meTTtp1pqGi1DbfVghLH-6kF8iznj1GIvocBxbGvefSqgZvMVwQdIvU/exec?action=getOrders');
+                const orders = await response.json();
+                const ordersList = document.getElementById('ordersList');
+                
+                // Фильтруем только оплаченные заказы
+                const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
+                
+                if (paidOrders.length === 0) {
+                    ordersList.innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-box-open"></i>
+                            <p>Оплаченных заказов пока нет</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-            ordersList.innerHTML = paidOrders.map((order, index) => `
-                <div class="order-card">
-                    <div class="order-header">
-                        <span class="order-date">${order.date}</span>
-                        <span class="order-type">${order.recipientType === 'myself' ? 'Для себя' : 'В подарок'}</span>
-                    </div>
-                    
-                    <div class="product-info">
-                        <div class="product-name">${order.productName}</div>
-                        <div class="product-details">${order.quantity} роз • ${order.totalAmount}</div>
-                        <div class="product-details">${order.roseLength} • ${order.roseVariety}</div>
-                    </div>
-                    
-                    ${order.recipientType === 'myself' ? `
-                        <div class="order-info">
-                            <div class="info-item">
-                                <span class="info-label">Имя</span>
-                                <span class="info-value">${order.myselfName}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Телефон</span>
-                                <span class="info-value">${order.myselfPhone}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Адрес</span>
-                                <span class="info-value">${order.myselfAddress}</span>
-                            </div>
-                            ${order.socialNetwork ? `
+                ordersList.innerHTML = paidOrders.map((order, index) => `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-date">${order.date}</span>
+                            <span class="order-type">${order.recipientType === 'myself' ? 'Для себя' : 'В подарок'}</span>
+                        </div>
+                        
+                        <div class="product-info">
+                            <div class="product-name">${order.productName}</div>
+                            <div class="product-details">${order.quantity} роз • ${order.totalAmount}</div>
+                            <div class="product-details">${order.roseLength} • ${order.roseVariety}</div>
+                        </div>
+                        
+                        ${order.recipientType === 'myself' ? `
+                            <div class="order-info">
                                 <div class="info-item">
-                                    <span class="info-label">Соцсеть</span>
-                                    <span class="info-value">${order.socialNetwork}</span>
+                                    <span class="info-label">Имя</span>
+                                    <span class="info-value">${order.myselfName}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Телефон</span>
+                                    <span class="info-value">${order.myselfPhone}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Адрес</span>
+                                    <span class="info-value">${order.myselfAddress}</span>
+                                </div>
+                                ${order.socialNetwork ? `
+                                    <div class="info-item">
+                                        <span class="info-label">Соцсеть</span>
+                                        <span class="info-value">${order.socialNetwork}</span>
                                 </div>
                             ` : ''}
                             ${order.myselfUsername && order.myselfUsername !== '@' ? `
@@ -428,6 +444,104 @@
                     `}
                 </div>
             `).reverse().join('');
+            } catch (error) {
+                console.error('Ошибка при загрузке заказов:', error);
+                // Fallback to localStorage
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                const ordersList = document.getElementById('ordersList');
+                const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
+                
+                if (paidOrders.length === 0) {
+                    ordersList.innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-box-open"></i>
+                            <p>Оплаченных заказов пока нет</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                ordersList.innerHTML = paidOrders.map((order, index) => `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-date">${order.date}</span>
+                            <span class="order-type">${order.recipientType === 'myself' ? 'Для себя' : 'В подарок'}</span>
+                        </div>
+                        
+                        <div class="product-info">
+                            <div class="product-name">${order.productName}</div>
+                            <div class="product-details">${order.quantity} роз • ${order.totalAmount}</div>
+                            <div class="product-details">${order.roseLength} • ${order.roseVariety}</div>
+                        </div>
+                        
+                        ${order.recipientType === 'myself' ? `
+                            <div class="order-info">
+                                <div class="info-item">
+                                    <span class="info-label">Имя</span>
+                                    <span class="info-value">${order.myselfName}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Телефон</span>
+                                    <span class="info-value">${order.myselfPhone}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Адрес</span>
+                                    <span class="info-value">${order.myselfAddress}</span>
+                                </div>
+                                ${order.socialNetwork ? `
+                                    <div class="info-item">
+                                        <span class="info-label">Соцсеть</span>
+                                        <span class="info-value">${order.socialNetwork}</span>
+                                    </div>
+                                ` : ''}
+                                ${order.myselfUsername && order.myselfUsername !== '@' ? `
+                                    <div class="info-item">
+                                        <span class="info-label">Юзернейм</span>
+                                        <span class="info-value">${order.myselfUsername}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : `
+                            <div class="order-info">
+                                <div class="info-item">
+                                    <span class="info-label">Имя заказчика</span>
+                                    <span class="info-value">${order.giftYourName}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Телефон заказчика</span>
+                                    <span class="info-value">${order.giftYourPhone}</span>
+                                </div>
+                                ${order.socialNetwork ? `
+                                    <div class="info-item">
+                                        <span class="info-label">Соцсеть</span>
+                                        <span class="info-value">${order.socialNetwork}</span>
+                                    </div>
+                                ` : ''}
+                                ${order.giftYourUsername && order.giftYourUsername !== '@' ? `
+                                    <div class="info-item">
+                                        <span class="info-label">Юзернейм</span>
+                                        <span class="info-value">${order.giftYourUsername}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="order-info" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(212, 175, 55, 0.2);">
+                                <div class="info-item">
+                                    <span class="info-label">Имя получателя</span>
+                                    <span class="info-value">${order.giftRecipientName}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Телефон получателя</span>
+                                    <span class="info-value">${order.giftRecipientPhone}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Адрес получателя</span>
+                                    <span class="info-value">${order.addressKnown === 'know' ? order.giftRecipientAddress : 'Неизвестно (уточним у получателя)'}</span>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                `).reverse().join('');
+            }
         }
 
         // Обработка нажатия Enter

@@ -2657,11 +2657,34 @@
             
             // Сохраняем заказ в список заказов с статусом "не оплачено"
             data.paymentStatus = 'unpaid';
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(data);
-            localStorage.setItem('orders', JSON.stringify(orders));
             
-            console.log('Заказ сохранен в localStorage:', data);
+            // Отправляем заказ в Google Sheets
+            sendOrderToGoogleSheets(data);
+            
+            console.log('Заказ отправлен в Google Sheets:', data);
+        }
+
+        async function sendOrderToGoogleSheets(order) {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyOpKMuDCez7meTTtp1pqGi1DbfVghLH-6kF8iznj1GIvocBxbGvefSqgZvMVwQdIvU/exec', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'addOrder',
+                        order: order
+                    })
+                });
+                console.log('Заказ успешно отправлен в Google Sheets');
+            } catch (error) {
+                console.error('Ошибка при отправке заказа в Google Sheets:', error);
+                // Fallback to localStorage
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                orders.push(order);
+                localStorage.setItem('orders', JSON.stringify(orders));
+            }
         }
 
         // Отправка заказа в Telegram

@@ -124,15 +124,45 @@
 
     <script>
         // При успешной оплате обновляем статус последнего заказа на "paid"
-        window.addEventListener('load', () => {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            if (orders.length > 0) {
-                // Находим последний неоплаченный заказ и обновляем его статус
-                const lastUnpaidOrder = [...orders].reverse().find(order => order.paymentStatus === 'unpaid');
-                if (lastUnpaidOrder) {
-                    lastUnpaidOrder.paymentStatus = 'paid';
-                    localStorage.setItem('orders', JSON.stringify(orders));
-                    console.log('Статус заказа обновлен на "paid"');
+        window.addEventListener('load', async () => {
+            try {
+                // Получаем заказы из Google Sheets
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyOpKMuDCez7meTTtp1pqGi1DbfVghLH-6kF8iznj1GIvocBxbGvefSqgZvMVwQdIvU/exec?action=getOrders');
+                const orders = await response.json();
+                
+                if (orders.length > 0) {
+                    // Находим последний неоплаченный заказ и обновляем его статус
+                    const lastUnpaidOrder = [...orders].reverse().find(order => order.paymentStatus === 'unpaid');
+                    if (lastUnpaidOrder) {
+                        lastUnpaidOrder.paymentStatus = 'paid';
+                        
+                        // Отправляем обновленный заказ в Google Sheets
+                        await fetch('https://script.google.com/macros/s/AKfycbyOpKMuDCez7meTTtp1pqGi1DbfVghLH-6kF8iznj1GIvocBxbGvefSqgZvMVwQdIvU/exec', {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                action: 'updateOrder',
+                                order: lastUnpaidOrder
+                            })
+                        });
+                        
+                        console.log('Статус заказа обновлен на "paid" в Google Sheets');
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при обновлении статуса заказа:', error);
+                // Fallback to localStorage
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                if (orders.length > 0) {
+                    const lastUnpaidOrder = [...orders].reverse().find(order => order.paymentStatus === 'unpaid');
+                    if (lastUnpaidOrder) {
+                        lastUnpaidOrder.paymentStatus = 'paid';
+                        localStorage.setItem('orders', JSON.stringify(orders));
+                        console.log('Статус заказа обновлен на "paid" в localStorage');
+                    }
                 }
             }
         });
