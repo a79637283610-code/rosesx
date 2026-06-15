@@ -2916,7 +2916,7 @@
             document.body.style.overflow = 'hidden';
         }
 
-        function closeModal(modal) {
+        function closeLegalModal(modal) {
             if (modal && modal.classList) {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
@@ -2939,26 +2939,26 @@
 
         if (closePrivacyBtn) {
             closePrivacyBtn.addEventListener('click', () => {
-                closeModal(privacyModal);
+                closeLegalModal(privacyModal);
             });
         }
 
         if (closeTermsBtn) {
             closeTermsBtn.addEventListener('click', () => {
-                closeModal(termsModal);
+                closeLegalModal(termsModal);
             });
         }
 
         // Закрытие по клику вне модального окна
         privacyModal.addEventListener('click', (e) => {
             if (e.target === privacyModal) {
-                closeModal(privacyModal);
+                closeLegalModal(privacyModal);
             }
         });
 
         termsModal.addEventListener('click', (e) => {
             if (e.target === termsModal) {
-                closeModal(termsModal);
+                closeLegalModal(termsModal);
             }
         });
 
