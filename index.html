@@ -2657,37 +2657,14 @@
             
             // Сохраняем заказ в список заказов с статусом "не оплачено"
             data.paymentStatus = 'unpaid';
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(data);
+            localStorage.setItem('orders', JSON.stringify(orders));
             
-            // Отправляем заказ в Google Sheets
-            sendOrderToGoogleSheets(data);
+            // Отправляем уведомление в Telegram
+            sendOrderToTelegram(data);
             
-            console.log('Заказ отправлен в Google Sheets:', data);
-        }
-
-        async function sendOrderToGoogleSheets(order) {
-            try {
-                // Используем прокси для обхода CORS
-                const targetUrl = 'https://script.google.com/macros/s/AKfycbyOpKMuDCez7meTTtp1pqGi1DbfVghLH-6kF8iznj1GIvocBxbGvefSqgZvMVwQdIvU/exec';
-                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-                
-                const response = await fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'addOrder',
-                        order: order
-                    })
-                });
-                console.log('Заказ успешно отправлен в Google Sheets');
-            } catch (error) {
-                console.error('Ошибка при отправке заказа в Google Sheets:', error);
-                // Fallback to localStorage
-                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                orders.push(order);
-                localStorage.setItem('orders', JSON.stringify(orders));
-            }
+            console.log('Заказ сохранен и отправлен в Telegram:', data);
         }
 
         // Отправка заказа в Telegram
