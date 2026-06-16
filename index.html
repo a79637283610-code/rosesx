@@ -2663,12 +2663,7 @@
             localStorage.setItem('orders', JSON.stringify(orders));
             
             console.log('Данные заказа:', data);
-            console.log('Вызываем sendOrderToTelegram');
-            
-            // Отправляем уведомление в Telegram
-            sendOrderToTelegram(data);
-            
-            console.log('Заказ сохранен и отправлен в Telegram:', data);
+            console.log('Заказ сохранен, уведомление будет отправлено после оплаты');
         }
 
         // Отправка заказа в Telegram

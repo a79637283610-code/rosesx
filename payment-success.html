@@ -123,7 +123,79 @@
     </div>
 
     <script>
-        // При успешной оплате обновляем статус последнего заказа на "paid"
+        // Отправка заказа в Telegram
+        async function sendOrderToTelegram(data) {
+            const botToken = '8998625093:AAEnkooMwWXqLoiYwENIHJJoOKktQeWSjzE';
+            const chatId = '7555010654';
+            
+            let message = `🌹 <b>НОВЫЙ ОПЛАЧЕННЫЙ ЗАКАЗ</b> 🌹\n\n`;
+            message += `<b>Товар:</b> ${data.productName}\n`;
+            message += `<b>Количество:</b> ${data.quantity} роз\n`;
+            message += `<b>Сумма:</b> ${data.totalAmount}\n\n`;
+            message += `<b>Тип заказа:</b> ${data.recipientType === 'myself' ? 'Для себя' : 'В подарок'}\n\n`;
+            
+            if (data.recipientType === 'myself') {
+                message += `<b>Данные клиента:</b>\n`;
+                message += `👤 Имя: ${data.myselfName}\n`;
+                message += `📱 Телефон: ${data.myselfPhone}\n`;
+                message += `📍 Адрес: ${data.myselfAddress}\n`;
+                if (data.socialNetwork) {
+                    message += `💬 Соцсеть: ${data.socialNetwork}\n`;
+                    if (data.myselfUsername && data.myselfUsername !== '@') {
+                        message += `🔗 Юзернейм: ${data.myselfUsername}\n`;
+                    }
+                }
+            } else {
+                message += `<b>Данные заказчика:</b>\n`;
+                message += `👤 Имя: ${data.giftYourName}\n`;
+                message += `📱 Телефон: ${data.giftYourPhone}\n`;
+                if (data.socialNetwork) {
+                    message += `💬 Соцсеть: ${data.socialNetwork}\n`;
+                }
+                if (data.giftYourUsername && data.giftYourUsername !== '@') {
+                    message += `🔗 Юзернейм: ${data.giftYourUsername}\n`;
+                }
+                message += `\n<b>Данные получателя:</b>\n`;
+                message += `👤 Имя: ${data.giftRecipientName}\n`;
+                message += `📱 Телефон: ${data.giftRecipientPhone}\n`;
+                if (data.addressKnown === 'know') {
+                    message += `📍 Адрес: ${data.giftRecipientAddress}\n`;
+                } else {
+                    message += `📍 Адрес: Неизвестно (уточним у получателя)\n`;
+                }
+            }
+            
+            console.log('Отправка сообщения в Telegram:', message);
+            
+            try {
+                const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                
+                const response = await fetch(telegramUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('Ответ от Telegram:', result);
+                
+                if (!result.ok) {
+                    console.error('Ошибка отправки в Telegram:', result);
+                } else {
+                    console.log('Сообщение успешно отправлено в Telegram');
+                }
+            } catch (error) {
+                console.error('Ошибка отправки в Telegram:', error);
+            }
+        }
+
+        // При успешной оплате обновляем статус последнего заказа на "paid" и отправляем уведомление
         window.addEventListener('load', () => {
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
             if (orders.length > 0) {
@@ -133,6 +205,9 @@
                     lastUnpaidOrder.paymentStatus = 'paid';
                     localStorage.setItem('orders', JSON.stringify(orders));
                     console.log('Статус заказа обновлен на "paid"');
+                    
+                    // Отправляем уведомление в Telegram
+                    sendOrderToTelegram(lastUnpaidOrder);
                 }
             }
         });
