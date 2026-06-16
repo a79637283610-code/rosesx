@@ -2712,15 +2712,12 @@
             console.log('Отправка сообщения в Telegram:', message);
             
             try {
-                // Используем CORS прокси для отправки запроса
-                const proxyUrl = 'https://corsproxy.io/?';
                 const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
                 
-                const response = await fetch(proxyUrl + encodeURIComponent(telegramUrl), {
+                const response = await fetch(telegramUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({
                         chat_id: chatId,
