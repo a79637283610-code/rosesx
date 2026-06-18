@@ -135,46 +135,14 @@
                 skin: "mini"
             }, {
                 onSuccess: function(options) {
-                    // Отправляем уведомление в Telegram
-                    sendTelegramNotification();
-                    // Перенаправляем на страницу благодарности
-                    window.location.href = 'thank-you.html';
+                    // Перенаправляем на страницу успешной оплаты
+                    window.location.href = 'payment-success.html';
                 },
                 onFail: function(reason, options) {
                     alert('Ошибка оплаты: ' + reason);
                     window.location.href = 'index.html';
                 }
             });
-        }
-
-        async function sendTelegramNotification() {
-            const botToken = '8998625093:AAEnkooMwWXqLoiYwENIHJJoOKktQeWSjzE';
-            const chatId = '7555010654';
-            
-            const message = `
-🌹 Новый заказ!
-
-📦 Товар: ${lastOrder.productName}
-💰 Сумма: ${lastOrder.totalAmount}
-📏 Размер: ${lastOrder.roseLength}
-🌸 Сорт: ${lastOrder.roseVariety}
-🔢 Количество: ${lastOrder.quantity}
-
-👤 Получатель: ${lastOrder.recipientType === 'gift' ? 'В подарок' : 'Для себя'}
-            `.trim();
-            
-            try {
-                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message
-                    })
-                });
-            } catch (error) {
-                console.error('Ошибка отправки в Telegram:', error);
-            }
         }
     </script>
 </body>
