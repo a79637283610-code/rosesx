@@ -2757,6 +2757,42 @@
             return true;
         }
 
+        // Функция отправки уведомления в Telegram
+        async function sendTelegramNotification() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const lastOrder = orders[orders.length - 1];
+            
+            if (!lastOrder) return;
+            
+            const botToken = 'YOUR_BOT_TOKEN';
+            const chatId = 'YOUR_CHAT_ID';
+            
+            const message = `
+🌹 Новый заказ!
+
+📦 Товар: ${lastOrder.productName}
+💰 Сумма: ${lastOrder.totalAmount}
+📏 Размер: ${lastOrder.roseLength}
+🌸 Сорт: ${lastOrder.roseVariety}
+🔢 Количество: ${lastOrder.quantity}
+
+👤 Получатель: ${lastOrder.recipientType === 'gift' ? 'В подарок' : 'Для себя'}
+            `.trim();
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message
+                    })
+                });
+            } catch (error) {
+                console.error('Ошибка отправки в Telegram:', error);
+            }
+        }
+
         // Функция оплаты через CloudPayments
         function payWithCloudPayments(amount, orderId) {
             var widget = new cp.CloudPayments();
@@ -2771,6 +2807,10 @@
                 onSuccess: function(options) {
                     alert('Оплата успешна!');
                     closeModal();
+                    // Отправляем уведомление в Telegram
+                    sendTelegramNotification();
+                    // Перенаправляем на страницу благодарности
+                    window.location.href = 'thank-you.html';
                 },
                 onFail: function(reason, options) {
                     alert('Ошибка оплаты: ' + reason);
