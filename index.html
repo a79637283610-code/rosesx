@@ -880,12 +880,15 @@
 
         .bouquet-image {
             width: 100%;
-            height: 300px;
+            height: 240px;
             background: var(--bg-primary);
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 16px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            position: relative;
         }
 
         .bouquet-image img {
@@ -2243,6 +2246,42 @@
             });
         });
 
+        // ==================== КАРУСЕЛЬ В МОДАЛЬНОМ ОКНЕ ====================
+        const modalCarousel = document.getElementById('modalCarousel');
+        const modalPrev = document.getElementById('modalPrev');
+        const modalNext = document.getElementById('modalNext');
+        const modalDots = document.getElementById('modalCarouselNav');
+        
+        if (modalCarousel && modalPrev && modalNext && modalDots) {
+            const modalSlides = modalCarousel.querySelectorAll('.carousel-slide');
+            const modalDotElements = modalDots.querySelectorAll('.carousel-dot');
+            let modalCurrentSlide = 0;
+
+            function updateModalCarousel() {
+                modalCarousel.style.transform = `translateX(-${modalCurrentSlide * 100}%)`;
+                modalDotElements.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === modalCurrentSlide);
+                });
+            }
+
+            modalPrev.addEventListener('click', () => {
+                modalCurrentSlide = (modalCurrentSlide - 1 + modalSlides.length) % modalSlides.length;
+                updateModalCarousel();
+            });
+
+            modalNext.addEventListener('click', () => {
+                modalCurrentSlide = (modalCurrentSlide + 1) % modalSlides.length;
+                updateModalCarousel();
+            });
+
+            modalDotElements.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    modalCurrentSlide = index;
+                    updateModalCarousel();
+                });
+            });
+        }
+
     </script>
 
     <!-- Модальное окно оформления заказа -->
@@ -2266,7 +2305,16 @@
                 <!-- Левая часть - фото букета -->
                 <div class="modal-left">
                     <div class="bouquet-image">
-                        <img id="modalProductImage" src="" alt="Букет роз">
+                        <div class="image-carousel" id="modalCarousel" data-current="0">
+                            <div class="carousel-slide"><img id="modalProductImage1" src="" alt="Букет роз"></div>
+                            <div class="carousel-slide"><img id="modalProductImage2" src="" alt="Букет роз"></div>
+                        </div>
+                        <button class="carousel-arrow prev" id="modalPrev">‹</button>
+                        <button class="carousel-arrow next" id="modalNext">›</button>
+                        <div class="carousel-nav" id="modalCarouselNav">
+                            <span class="carousel-dot active"></span>
+                            <span class="carousel-dot"></span>
+                        </div>
                     </div>
                     <div class="bouquet-info">
                         <p class="model-info">Рост модели: 175 см</p>
@@ -2417,11 +2465,11 @@
 
         // Данные о товарах
         const products = {
-            'Standart': { price: 139, size: '60 см', variety: 'Ред Наоми', image: 'images/standart/1.jpg' },
-            'Base Minimum': { price: 169, size: '70 см', variety: 'Ред Наоми', image: 'images/base-minimum/70.jpg' },
-            'Quiet luxury': { price: 189, size: '80 см', variety: 'Ред Наоми', image: 'images/quiet-luxury/80.jpg' },
-            'Pafos': { price: 359, size: '90 см', variety: 'Премиальные Эквадорские', image: 'images/pafos/90.jpg' },
-            'Papik': { price: 399, size: '100 см', variety: 'Премиальные Эквадорские', image: 'images/papik/100.jpg' }
+            'Standart': { price: 139, size: '60 см', variety: 'Ред Наоми', image1: 'images/standart/1.jpg', image2: 'images/standart/2.jpg' },
+            'Base Minimum': { price: 169, size: '70 см', variety: 'Ред Наоми', image1: 'images/base-minimum/70.jpg', image2: 'images/base-minimum/70 — копия.jpg' },
+            'Quiet luxury': { price: 189, size: '80 см', variety: 'Ред Наоми', image1: 'images/quiet-luxury/80.jpg', image2: 'images/quiet-luxury/80 — копия.jpg' },
+            'Pafos': { price: 359, size: '90 см', variety: 'Премиальные Эквадорские', image1: 'images/pafos/90.jpg', image2: 'images/pafos/90 — копия.jpg' },
+            'Papik': { price: 399, size: '100 см', variety: 'Премиальные Эквадорские', image1: 'images/papik/100.jpg', image2: 'images/papik/100 — копия.jpg' }
         };
 
         let currentProduct = null;
@@ -2436,10 +2484,12 @@
                 // Обновляем информацию в модальном окне
                 const roseCount = document.querySelector('.rose-count');
                 const modalProductName = document.getElementById('modalProductName');
-                const modalProductImage = document.getElementById('modalProductImage');
+                const modalProductImage1 = document.getElementById('modalProductImage1');
+                const modalProductImage2 = document.getElementById('modalProductImage2');
                 if (roseCount) roseCount.textContent = `На фото: 1 роз`;
                 if (modalProductName) modalProductName.textContent = title;
-                if (modalProductImage && currentProduct.image) modalProductImage.src = currentProduct.image;
+                if (modalProductImage1 && currentProduct.image1) modalProductImage1.src = currentProduct.image1;
+                if (modalProductImage2 && currentProduct.image2) modalProductImage2.src = currentProduct.image2;
                 if (totalAmount) totalAmount.textContent = `${currentProduct.price} ₽`;
                 if (quantityInput) quantityInput.value = 1;
                 if (evenWarning) {
