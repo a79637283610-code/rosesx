@@ -2754,6 +2754,27 @@
             return true;
         }
 
+        // Функция оплаты через Т-Банк
+        async function payWithTBank(amount, orderId) {
+            const res = await fetch('https://t-bank-payment.a79637283610.workers.dev', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: amount * 100,
+                    orderId: orderId,
+                    description: 'Оплата букета роз'
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (data.PaymentURL) {
+                window.location.href = data.PaymentURL;
+            } else {
+                alert('Ошибка: ' + (data.Message || data.error));
+            }
+        }
+
         // Отправка формы
         const recipientForm = document.querySelector('.recipient-form');
         const submitBtn = document.querySelector('.submit-btn');
@@ -2785,9 +2806,12 @@
                     return;
                 }
                 
-                // Перенаправляем на симулятор оплаты для тестирования
-                console.log('Перенаправляем на симулятор оплаты...');
-                window.location.href = 'payment-simulator.html';
+                // Инициируем оплату через Т-Банк
+                console.log('Инициируем оплату через Т-Банк...');
+                const quantity = parseInt(quantityInput.value);
+                const total = currentProduct.price * quantity;
+                const orderId = 'order-' + Date.now();
+                payWithTBank(total, orderId);
             });
         } else {
             console.error('Форма не найдена!');
