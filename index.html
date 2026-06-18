@@ -889,6 +889,7 @@
             border-radius: 16px;
             border: 1px solid rgba(212, 175, 55, 0.1);
             position: relative;
+            aspect-ratio: 3/4;
         }
 
         .bouquet-image img {
@@ -896,6 +897,74 @@
             height: 100%;
             object-fit: cover;
             object-position: center;
+        }
+
+        .bouquet-image .image-carousel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .bouquet-image .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .bouquet-image .carousel-arrow:hover {
+            background: rgba(212, 175, 55, 0.8);
+        }
+
+        .bouquet-image .carousel-arrow.prev {
+            left: 10px;
+        }
+
+        .bouquet-image .carousel-arrow.next {
+            right: 10px;
+        }
+
+        .bouquet-image .carousel-nav {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .bouquet-image .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.3);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .bouquet-image .carousel-dot.active {
+            background: var(--gold);
+        }
+
+        .bouquet-image .carousel-dot:hover {
+            background: rgba(212, 175, 55, 0.6);
         }
 
         .bouquet-info {
@@ -2251,11 +2320,13 @@
         const modalPrev = document.getElementById('modalPrev');
         const modalNext = document.getElementById('modalNext');
         const modalDots = document.getElementById('modalCarouselNav');
-        
+        let modalDotElements = null;
+        let modalSlides = null;
+        let modalCurrentSlide = 0;
+
         if (modalCarousel && modalPrev && modalNext && modalDots) {
-            const modalSlides = modalCarousel.querySelectorAll('.carousel-slide');
-            const modalDotElements = modalDots.querySelectorAll('.carousel-dot');
-            let modalCurrentSlide = 0;
+            modalSlides = modalCarousel.querySelectorAll('.carousel-slide');
+            modalDotElements = modalDots.querySelectorAll('.carousel-dot');
 
             function updateModalCarousel() {
                 modalCarousel.style.transform = `translateX(-${modalCurrentSlide * 100}%)`;
@@ -2492,6 +2563,17 @@
                 if (modalProductImage2 && currentProduct.image2) modalProductImage2.src = currentProduct.image2;
                 if (totalAmount) totalAmount.textContent = `${currentProduct.price} ₽`;
                 if (quantityInput) quantityInput.value = 1;
+                
+                // Reset modal carousel to first slide
+                if (modalCarousel) {
+                    modalCarousel.style.transform = 'translateX(0)';
+                    modalCarousel.dataset.current = '0';
+                    if (modalDotElements) {
+                        modalDotElements.forEach((dot, index) => {
+                            dot.classList.toggle('active', index === 0);
+                        });
+                    }
+                }
                 if (evenWarning) {
                     evenWarning.classList.remove('show');
                     setTimeout(() => {
