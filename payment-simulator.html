@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Симулятор оплаты - ShinyRoses</title>
+    <title>Оплата - ShinyRoses</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"></script>
     <style>
         * {
             margin: 0;
@@ -18,8 +19,6 @@
             --bg-secondary: #111111;
             --text-primary: #ffffff;
             --text-secondary: #b0b0b0;
-            --success: #4CAF50;
-            --error: #ff4444;
         }
 
         body {
@@ -33,7 +32,7 @@
             padding: 20px;
         }
 
-        .simulator-container {
+        .payment-container {
             text-align: center;
             max-width: 600px;
             padding: 60px 40px;
@@ -56,13 +55,6 @@
             margin-bottom: 40px;
         }
 
-        .buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
         .btn {
             padding: 15px 40px;
             font-family: 'Georgia', serif;
@@ -75,32 +67,17 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             min-width: 200px;
+            background: var(--gold);
+            color: var(--bg-primary);
         }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #45a049;
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
-        }
-
-        .btn-failure {
-            background: var(--error);
-            color: white;
-        }
-
-        .btn-failure:hover {
-            background: #e53935;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.3);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
         }
 
         @media (max-width: 768px) {
-            .simulator-container {
+            .payment-container {
                 padding: 40px 20px;
             }
 
@@ -112,10 +89,6 @@
                 font-size: 1rem;
             }
 
-            .buttons {
-                flex-direction: column;
-            }
-
             .btn {
                 width: 100%;
             }
@@ -123,24 +96,85 @@
     </style>
 </head>
 <body>
-    <div class="simulator-container">
-        <h1>Симулятор оплаты</h1>
-        <p class="message">
-            Выберите результат оплаты для тестирования
-        </p>
-        <div class="buttons">
-            <button class="btn btn-success" onclick="paymentSuccess()">Оплата прошла</button>
-            <button class="btn btn-failure" onclick="paymentFailure()">Оплата не прошла</button>
-        </div>
+    <div class="payment-container">
+        <h1>Оплата заказа</h1>
+        <p class="message" id="orderInfo">Загрузка информации о заказе...</p>
+        <button class="btn" onclick="initiatePayment()">Оплатить</button>
     </div>
 
     <script>
-        function paymentSuccess() {
-            window.location.href = 'payment-success.html';
+        // Получаем данные заказа из localStorage
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const lastOrder = orders[orders.length - 1];
+
+        if (lastOrder) {
+            document.getElementById('orderInfo').innerHTML = `
+                Товар: ${lastOrder.productName}<br>
+                Сумма: ${lastOrder.totalAmount}<br>
+                Количество: ${lastOrder.quantity}
+            `;
         }
 
-        function paymentFailure() {
-            window.location.href = 'payment-failure.html';
+        function initiatePayment() {
+            if (!lastOrder) {
+                alert('Ошибка: данные заказа не найдены');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const amount = parseInt(lastOrder.totalAmount);
+            const orderId = 'order-' + Date.now();
+
+            var widget = new cp.CloudPayments();
+            widget.pay('auth', {
+                publicId: 'pk_83ce8c1e6b85ef9e73ed3afdb7c64',
+                description: 'Оплата букета роз',
+                amount: amount,
+                currency: 'RUB',
+                invoiceId: orderId,
+                skin: "mini"
+            }, {
+                onSuccess: function(options) {
+                    // Отправляем уведомление в Telegram
+                    sendTelegramNotification();
+                    // Перенаправляем на страницу благодарности
+                    window.location.href = 'thank-you.html';
+                },
+                onFail: function(reason, options) {
+                    alert('Ошибка оплаты: ' + reason);
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        async function sendTelegramNotification() {
+            const botToken = '8998625093:AAEnkooMwWXqLoiYwENIHJJoOKktQeWSjzE';
+            const chatId = '7555010654';
+            
+            const message = `
+🌹 Новый заказ!
+
+📦 Товар: ${lastOrder.productName}
+💰 Сумма: ${lastOrder.totalAmount}
+📏 Размер: ${lastOrder.roseLength}
+🌸 Сорт: ${lastOrder.roseVariety}
+🔢 Количество: ${lastOrder.quantity}
+
+👤 Получатель: ${lastOrder.recipientType === 'gift' ? 'В подарок' : 'Для себя'}
+            `.trim();
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message
+                    })
+                });
+            } catch (error) {
+                console.error('Ошибка отправки в Telegram:', error);
+            }
         }
     </script>
 </body>

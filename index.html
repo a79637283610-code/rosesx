@@ -2764,7 +2764,7 @@
             
             if (!lastOrder) return;
             
-            const botToken = '8940520563:AAEPLcnKGEOiCbUt_Z6H5G0tR68Mc0LeRXU';
+            const botToken = '8998625093:AAEnkooMwWXqLoiYwENIHJJoOKktQeWSjzE';
             const chatId = '7555010654';
             
             const message = `
@@ -2849,12 +2849,9 @@
                     return;
                 }
                 
-                // Инициируем оплату через CloudPayments
-                console.log('Инициируем оплату через CloudPayments...');
-                const quantity = parseInt(quantityInput.value);
-                const total = currentProduct.price * quantity;
-                const orderId = 'order-' + Date.now();
-                payWithCloudPayments(total, orderId);
+                // Перенаправляем на симулятор оплаты
+                console.log('Перенаправляем на симулятор оплаты...');
+                window.location.href = 'payment-simulator.html';
             });
         } else {
             console.error('Форма не найдена!');
