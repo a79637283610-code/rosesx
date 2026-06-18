@@ -889,7 +889,7 @@
             border-radius: 16px;
             border: 1px solid rgba(212, 175, 55, 0.1);
             position: relative;
-            aspect-ratio: 3/4;
+            aspect-ratio: 1/1;
         }
 
         .bouquet-image img {
@@ -2316,41 +2316,48 @@
         });
 
         // ==================== КАРУСЕЛЬ В МОДАЛЬНОМ ОКНЕ ====================
-        const modalCarousel = document.getElementById('modalCarousel');
-        const modalPrev = document.getElementById('modalPrev');
-        const modalNext = document.getElementById('modalNext');
-        const modalDots = document.getElementById('modalCarouselNav');
+        let modalCarousel = null;
+        let modalPrev = null;
+        let modalNext = null;
+        let modalDots = null;
         let modalDotElements = null;
         let modalSlides = null;
         let modalCurrentSlide = 0;
 
-        if (modalCarousel && modalPrev && modalNext && modalDots) {
-            modalSlides = modalCarousel.querySelectorAll('.carousel-slide');
-            modalDotElements = modalDots.querySelectorAll('.carousel-dot');
+        function initModalCarousel() {
+            modalCarousel = document.getElementById('modalCarousel');
+            modalPrev = document.getElementById('modalPrev');
+            modalNext = document.getElementById('modalNext');
+            modalDots = document.getElementById('modalCarouselNav');
+            
+            if (modalCarousel && modalPrev && modalNext && modalDots) {
+                modalSlides = modalCarousel.querySelectorAll('.carousel-slide');
+                modalDotElements = modalDots.querySelectorAll('.carousel-dot');
 
-            function updateModalCarousel() {
-                modalCarousel.style.transform = `translateX(-${modalCurrentSlide * 100}%)`;
+                function updateModalCarousel() {
+                    modalCarousel.style.transform = `translateX(-${modalCurrentSlide * 100}%)`;
+                    modalDotElements.forEach((dot, index) => {
+                        dot.classList.toggle('active', index === modalCurrentSlide);
+                    });
+                }
+
+                modalPrev.onclick = () => {
+                    modalCurrentSlide = (modalCurrentSlide - 1 + modalSlides.length) % modalSlides.length;
+                    updateModalCarousel();
+                };
+
+                modalNext.onclick = () => {
+                    modalCurrentSlide = (modalCurrentSlide + 1) % modalSlides.length;
+                    updateModalCarousel();
+                };
+
                 modalDotElements.forEach((dot, index) => {
-                    dot.classList.toggle('active', index === modalCurrentSlide);
+                    dot.onclick = () => {
+                        modalCurrentSlide = index;
+                        updateModalCarousel();
+                    };
                 });
             }
-
-            modalPrev.addEventListener('click', () => {
-                modalCurrentSlide = (modalCurrentSlide - 1 + modalSlides.length) % modalSlides.length;
-                updateModalCarousel();
-            });
-
-            modalNext.addEventListener('click', () => {
-                modalCurrentSlide = (modalCurrentSlide + 1) % modalSlides.length;
-                updateModalCarousel();
-            });
-
-            modalDotElements.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
-                    modalCurrentSlide = index;
-                    updateModalCarousel();
-                });
-            });
         }
 
     </script>
@@ -2564,10 +2571,13 @@
                 if (totalAmount) totalAmount.textContent = `${currentProduct.price} ₽`;
                 if (quantityInput) quantityInput.value = 1;
                 
+                // Initialize modal carousel
+                initModalCarousel();
+                
                 // Reset modal carousel to first slide
                 if (modalCarousel) {
+                    modalCurrentSlide = 0;
                     modalCarousel.style.transform = 'translateX(0)';
-                    modalCarousel.dataset.current = '0';
                     if (modalDotElements) {
                         modalDotElements.forEach((dot, index) => {
                             dot.classList.toggle('active', index === 0);
