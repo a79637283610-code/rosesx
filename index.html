@@ -1760,8 +1760,8 @@
                 <div class="product-card" style="transition-delay: 0.1s;">
                     <div class="product-image">
                         <div class="image-carousel" data-current="0">
-                            <div class="carousel-slide"><img src="images/standart/1.jpg" onerror="this.src='images/standart/1.png'" alt="Standart роза"></div>
-                            <div class="carousel-slide"><img src="images/standart/2.jpg" onerror="this.src='images/standart/2.png'" alt="Standart роза"></div>
+                            <div class="carousel-slide"><img src="images/standart/1.jpg" alt="Standart роза"></div>
+                            <div class="carousel-slide"><img src="images/standart/2.jpg" alt="Standart роза"></div>
                         </div>
                         <button class="carousel-arrow prev">‹</button>
                         <button class="carousel-arrow next">›</button>
@@ -2254,7 +2254,7 @@
                 <!-- Левая часть - фото букета -->
                 <div class="modal-left">
                     <div class="bouquet-image">
-                        🌹
+                        <img id="modalProductImage" src="" alt="Букет роз">
                     </div>
                     <div class="bouquet-info">
                         <p class="model-info">Рост модели: 175 см</p>
@@ -2405,11 +2405,11 @@
 
         // Данные о товарах
         const products = {
-            'Standart': { price: 139, size: '60 см', variety: 'Ред Наоми' },
-            'Base Minimum': { price: 169, size: '70 см', variety: 'Ред Наоми' },
-            'Quiet luxury': { price: 189, size: '80 см', variety: 'Ред Наоми' },
-            'Pafos': { price: 359, size: '90 см', variety: 'Премиальные Эквадорские' },
-            'Papik': { price: 399, size: '100 см', variety: 'Премиальные Эквадорские' }
+            'Standart': { price: 139, size: '60 см', variety: 'Ред Наоми', image: 'images/standart/1.jpg' },
+            'Base Minimum': { price: 169, size: '70 см', variety: 'Ред Наоми', image: 'images/base-minimum/70.PNG' },
+            'Quiet luxury': { price: 189, size: '80 см', variety: 'Ред Наоми', image: 'images/quiet-luxury/80.PNG' },
+            'Pafos': { price: 359, size: '90 см', variety: 'Премиальные Эквадорские', image: 'images/pafos/90.PNG' },
+            'Papik': { price: 399, size: '100 см', variety: 'Премиальные Эквадорские', image: 'images/papik/100.PNG' }
         };
 
         let currentProduct = null;
@@ -2424,8 +2424,10 @@
                 // Обновляем информацию в модальном окне
                 const roseCount = document.querySelector('.rose-count');
                 const modalProductName = document.getElementById('modalProductName');
+                const modalProductImage = document.getElementById('modalProductImage');
                 if (roseCount) roseCount.textContent = `На фото: 1 роз`;
                 if (modalProductName) modalProductName.textContent = title;
+                if (modalProductImage && currentProduct.image) modalProductImage.src = currentProduct.image;
                 if (totalAmount) totalAmount.textContent = `${currentProduct.price} ₽`;
                 if (quantityInput) quantityInput.value = 1;
                 if (evenWarning) {
