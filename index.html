@@ -15,6 +15,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- CloudPayments Widget -->
+    <script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"></script>
+    
     <style>
         /* ==================== CSS ПЕРЕМЕННЫЕ ==================== */
         :root {
@@ -2754,25 +2757,25 @@
             return true;
         }
 
-        // Функция оплаты через Т-Банк
-        async function payWithTBank(amount, orderId) {
-            const res = await fetch('https://t-bank-payment.a79637283610.workers.dev', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    amount: amount * 100,
-                    orderId: orderId,
-                    description: 'Оплата букета роз'
-                })
+        // Функция оплаты через CloudPayments
+        function payWithCloudPayments(amount, orderId) {
+            var widget = new cp.CloudPayments();
+            widget.pay('auth', {
+                publicId: 'pk_83ce8c1e6b85ef9e73ed3afdb7c64',
+                description: 'Оплата букета роз',
+                amount: amount,
+                currency: 'RUB',
+                invoiceId: orderId,
+                skin: "mini"
+            }, {
+                onSuccess: function(options) {
+                    alert('Оплата успешна!');
+                    closeModal();
+                },
+                onFail: function(reason, options) {
+                    alert('Ошибка оплаты: ' + reason);
+                }
             });
-            
-            const data = await res.json();
-            
-            if (data.PaymentURL) {
-                window.location.href = data.PaymentURL;
-            } else {
-                alert('Ошибка: ' + (data.Message || data.error));
-            }
         }
 
         // Отправка формы
@@ -2806,12 +2809,12 @@
                     return;
                 }
                 
-                // Инициируем оплату через Т-Банк
-                console.log('Инициируем оплату через Т-Банк...');
+                // Инициируем оплату через CloudPayments
+                console.log('Инициируем оплату через CloudPayments...');
                 const quantity = parseInt(quantityInput.value);
                 const total = currentProduct.price * quantity;
                 const orderId = 'order-' + Date.now();
-                payWithTBank(total, orderId);
+                payWithCloudPayments(total, orderId);
             });
         } else {
             console.error('Форма не найдена!');
